@@ -23,12 +23,33 @@ var Vless_UUID = "${_Vless_UUID}";
 var Vless_Path = "${_Vless_Path}";
 var Vmess_UUID = "${_Vmess_UUID}";
 var Vmess_Path = "${_Vmess_Path}";
+var serverPort = location.port || (location.protocol === "https:" ? "443" : "80");
+var tlsMode = location.protocol === "https:" ? "tls" : "none";
 
-var Vless_link = `vless://${Vless_UUID}@${location.hostname}:443?path=${encodeURIComponent(Vless_Path)}&security=tls&encryption=none&type=ws#Vless`
+function base64Encode(value) {
+    return btoa(unescape(encodeURIComponent(value)));
+}
+
+var Vless_link = `vless://${Vless_UUID}@${location.hostname}:${serverPort}?path=${encodeURIComponent(Vless_Path)}&security=${tlsMode}&encryption=none&type=ws#Vless`
 document.querySelector("#vless code").textContent = Vless_link;
 new QRCode(document.getElementById('vless_qr'), Vless_link);
 
-var Vmess_link = `vmess://${Vmess_UUID}@${location.hostname}:443?path=${encodeURIComponent(Vmess_Path)}&security=tls&encryption=none&type=ws#Vmess`
+var Vmess_config = {
+    v: "2",
+    ps: "Vmess",
+    add: location.hostname,
+    port: serverPort,
+    id: Vmess_UUID,
+    aid: "0",
+    scy: "auto",
+    net: "ws",
+    type: "none",
+    host: location.hostname,
+    path: Vmess_Path,
+    tls: tlsMode,
+    sni: location.hostname
+};
+var Vmess_link = `vmess://${base64Encode(JSON.stringify(Vmess_config))}`
 document.querySelector("#vmess code").textContent = Vmess_link;
 new QRCode(document.getElementById('vmess_qr'), Vmess_link);
 
